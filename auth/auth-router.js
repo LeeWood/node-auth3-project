@@ -4,8 +4,21 @@ const jwt = require('jsonwebtoken');
 const secrets = require('./secrets.js');
 const Users = require('../users/user-model.js');
 
-function genToken() {
-  //token stuff here
+function genToken(user) {
+
+  const payload = {
+    userId: user.id,
+    username: user.id,
+    department: user.department
+  };
+  
+  const options = {
+    expiresIn: '1h'
+  };
+
+  const token = jwt.sign(payload, secrets.jwtSecret, options);
+
+  return token;
 }
 
 router.post('/register', (req, res) => {
@@ -33,11 +46,11 @@ router.post('/login', (req, res) => {
     .first()
     .then(user => {
       if(user && bcrypt.compareSync(password, user.password)) {
-        //gen token here
+        const token = genToken(user);
 
         res.status(200).json({
           message: `Good to see you again, ${user.username}!`,
-          //token: token
+          token: token
         });
       }else {
         res.status(401).json({ message: "Invalid credentials..."});
